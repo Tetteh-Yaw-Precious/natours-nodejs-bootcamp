@@ -9,7 +9,8 @@ app.use(express.json());
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
-app.get('/api/v1/tours', (req, res) => {
+
+const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
     results: tours.length,
@@ -17,9 +18,9 @@ app.get('/api/v1/tours', (req, res) => {
       tours: tours,
     },
   });
-});
+}
 
-app.get('/api/v1/tours/:id', (req, res) => {
+const getTour = (req, res) => {
   const id = Number(req.params.id);
   if(id > tours.length) {
     return res.status(400).json({
@@ -28,7 +29,6 @@ app.get('/api/v1/tours/:id', (req, res) => {
     })
   }
   let tour;
-  console.log(id)
     tours.forEach(element => {
     if(element.id === id) {
       tour = element;
@@ -36,38 +36,21 @@ app.get('/api/v1/tours/:id', (req, res) => {
     return tour;
   });
 
-  console.log(tour)
   res.status(200).json({
     status: 'success',
     data: {
       tour
     },
   });
-});
+}
 
-app.get('/', (req, res) => {
-  res
-    .status(200)
-    .json({ message: 'Hello from the server side', app: 'natours' });
-});
-
-app.post('/', (req, res) => {
-  res.send('You can eat oo');
-});
-
-const port = 3000;
-app.listen(port, () => {
-  console.log(`App running on port ${port}`);
-});
-
-app.post('/api/v1/tours', (req, res) => {
+const createTour = (req, res) => {
   // console.log(req.body);
   const newId = tours[tours.length-1].id + 1;
-  console.log(req.body)
   const newTour = Object.assign({ id: newId}, req.body)
 
   tours.push(newTour)
-  fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err=>{
+  fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err =>{
     res.status(201).json({
       status: "success",
       data: {
@@ -75,8 +58,49 @@ app.post('/api/v1/tours', (req, res) => {
       }
     })
   })
+}
+
+const updateTour = (req,res)=>{
+  if (req.params.id * 1 > tours.length){
+   return res.status(404).json({
+     status: 'fail',
+     message: "INVALID ID"
+   })
+  }
+ 
+  res.status(200).json({
+   status: "success",
+   data: {
+     tour: "<updated tour here ....>"
+   }
+  })
+ }
+
+ const deleteTour =  (req,res)=>{
+  if (req.params.id * 1 > tours.length){
+   return res.status(404).json({
+     status: 'fail',
+     message: "INVALID ID"
+   })
+  }
+ 
+  res.status(204).json({
+   status: "success",
+   data: null
+  })
+ }
+
+app.get('/api/v1/tours',getAllTours );
+app.get('/api/v1/tours/:id',getTour );
+app.post('/api/v1/tours', createTour );
+app.patch('/api/v1/tours/:id',updateTour )
+app.delete('/api/v1/tours/:id',deleteTour)
+
+
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+app.route('/api/v1/tours/:id').patch(updateTour).delete(deleteTour)
+
+const port = 3000;
+app.listen(port, () => {
+  console.log(`App running on port ${port}`);
 });
-
-// app.patch('/api/v1/tours/:id', (req,res)=>{
-
-// })
