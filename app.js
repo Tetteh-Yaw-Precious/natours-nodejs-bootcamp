@@ -1,13 +1,18 @@
 //Our modules
-const fs = require('fs');
 const express = require('express');
+
 const app = express();
 const morgan = require('morgan');
+const dotenv = require('dotenv');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
+dotenv.config({ path: './config.env' });
+
 //MIDDLEWARES
-app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+}
 app.use(express.json());
 app.use(express.static(`${__dirname}/public`));
 
